@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dashboard</string>
+    <string name="dashboard_title">Panel Principal</string>
+    <string name="dashboard_welcome">Bienvenido</string>
+    <string name="dashboard_logout">Cerrar Sesión</string>
+    <string name="dashboard_settings">Configuración</string>
+    <string name="dashboard_profile">Perfil</string>
+</resources>

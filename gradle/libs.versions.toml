@@ -1,0 +1,149 @@
+[versions]
+kotlin = "1.9.22"
+agp = "8.4.0"
+compileSdk = "34"
+targetSdk = "34"
+minSdk = "26"
+
+kotlinxCoroutines = "1.7.3"
+kotlinxCoroutinesAndroid = "1.7.3"
+
+# AndroidX
+androidxCore = "1.12.0"
+androidxAppCompat = "1.6.1"
+androidxMaterial = "1.11.0"
+androidxActivity = "1.8.2"
+androidxFragment = "1.6.2"
+androidxNavigation = "2.7.6"
+androidxLifecycle = "2.7.0"
+androidxViewBinding = "1.0.0"
+
+# Room
+roomRuntime = "2.6.1"
+roomCompiler = "2.6.1"
+roomKtx = "2.6.1"
+
+# Hilt
+hiltAndroid = "2.50"
+hiltCompiler = "2.50"
+hiltNavigationCompose = "1.1.0"
+
+# Firebase
+firebaseBom = "32.7.1"
+firebaseAuth = "22.3.1"
+firebaseFirestore = "24.10.2"
+firebaseStorage = "20.3.0"
+firebaseMessaging = "23.3.1"
+firebaseAnalytics = "21.5.0"
+firebaseConfig = "21.6.1"
+
+# Google Auth
+googleAuth = "1.6.0"
+
+# Paging
+pagingRuntime = "3.2.1"
+pagingRuntimeKtx = "3.2.1"
+
+# Networking
+okhttp = "4.12.0"
+retrofit = "2.9.0"
+converterGson = "2.9.0"
+
+# Image loading
+coil = "2.5.0"
+
+# Kotlin extensions
+kotlinxSerializationJson = "1.6.2"
+
+# Security
+securityCrypto = "1.1.0-alpha06"
+
+# Play Services
+playServicesAuth = "20.7.0"
+
+# iOS
+kotlinMultiplatform = "1.9.22"
+
+# Compose
+composeUi = "1.6.2"
+composeMaterial3 = "1.2.1"
+composeFoundation = "1.6.2"
+
+[libraries]
+# Kotlin
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+
+# AndroidX
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppCompat" }
+androidx-material = { module = "com.google.android.material:material", version.ref = "androidxMaterial" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidxActivity" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "androidxFragment" }
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "androidxNavigation" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "androidxNavigation" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidxLifecycle" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
+androidx-viewbinding = { module = "androidx.viewbinding:viewbinding", version.ref = "androidxViewBinding" }
+
+# Room
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+
+# Hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
+# Firebase BoM
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+firebase-storage = { module = "com.google.firebase:firebase-storage" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-config = { module = "com.google.firebase:firebase-config" }
+
+# Google Auth
+google-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+
+# Paging
+paging-runtime-ktx = { module = "androidx.paging:paging-runtime-ktx", version.ref = "pagingRuntimeKtx" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingRuntime" }
+
+# Networking
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+
+# Image loading
+coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+
+# Kotlin serialization
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+# Security
+security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+
+# Compose
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "composeUi" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "composeMaterial3" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "composeFoundation" }
+
+# Koin
+koin-core = { module = "io.insert-koin:koin-core", version = "3.5.0" }
+koin-android = { module = "io.insert-koin:koin-android", version = "3.5.0" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version = "3.5.0" }
+koin-androidx-navigation = { module = "io.insert-koin:koin-androidx-navigation", version = "3.5.0" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }

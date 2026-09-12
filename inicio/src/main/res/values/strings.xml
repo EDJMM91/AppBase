@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Inicio</string>
+    <string name="splash_title">AppBase</string>
+    <string name="splash_loading">Cargando...</string>
+    <string name="login_email">Correo Electr�nico</string>
+    <string name="login_password">Contrase�a</string>
+    <string name="login_button">Entrar</string>
+    <string name="login_google">Continuar con Google</string>
+</resources>

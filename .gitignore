@@ -1,0 +1,40 @@
+﻿# Android
+*.iml
+*.ipr
+*.iws
+build/
+.gradle/
+local.properties
+*.keystore
+*.jks
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+app/build/
+inicio/build/
+dashboard/build/
+nube/build/
+autenticacion/build/
+tema/build/
+configuracion/build/
+perfil/build/
+basededatos/build/
+servicios/build/
+metricas/build/
+
+# Gradle
+gradle/app/
+.gradle/
+
+# Gradle wrapper
+gradle/wrapper/gradle-wrapper.properties
+local.properties

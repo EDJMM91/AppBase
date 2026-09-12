@@ -1,0 +1,39 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'org.jetbrains.kotlin.plugin.parcelize'
+    id 'com.google.dagger.hilt.android'
+}
+android {
+    namespace 'com.moto.project.app'
+    compileSdk 34
+    defaultConfig { applicationId "com.moto.project.app"; minSdk 26; targetSdk 34; versionCode 1; versionName "1.0" }
+    buildTypes { release { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    kotlinOptions { jvmTarget = '17' }
+    buildFeatures { compose true }
+}
+dependencies {
+    implementation project(':inicio')
+    implementation project(':dashboard')
+    implementation project(':nube')
+    implementation project(':autenticacion')
+    implementation project(':tema')
+    implementation project(':configuracion')
+    implementation project(':perfil')
+    implementation project(':basededatos')
+    implementation project(':servicios')
+    implementation project(':metricas')
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.material
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.navigation.fragment.ktx
+    implementation libs.androidx.navigation.ui.ktx
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.hilt.android
+    kapt libs.hilt.compiler
+    implementation libs.koin.core
+    implementation libs.koin.android
+}
