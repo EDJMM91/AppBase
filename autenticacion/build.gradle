@@ -22,9 +22,16 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+    buildFeatures {
+        compose true
+    }
 }
 
 dependencies {
+    implementation project(':tema')
+    implementation libs.androidx.compose.ui.ui
+    implementation libs.androidx.compose.material3.material3
+    implementation libs.androidx.activity.ktx
     implementation libs.firebase.auth
     implementation libs.google.auth
     implementation libs.hilt.android
@@ -33,4 +40,5 @@ dependencies {
     implementation libs.koin.android
     implementation libs.koin.androidx.compose
     implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.viewmodel.ktx
 }

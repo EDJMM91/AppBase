@@ -12,9 +12,29 @@ import androidx.lifecycle.viewModelScope
 
 @Singleton
 class SplashViewModel @Inject constructor() : ViewModel() {
-    private val _splashState = MutableStateFlow(SplashState.Cargando)
+    private val _splashState = MutableStateFlow<SplashState>(SplashState.Cargando)
     val splashState: StateFlow<SplashState> = _splashState.asStateFlow()
-    init { viewModelScope.launch { delay(2000L); _splashState.value = SplashState.Listo } }
+
+    private val _titulo = MutableStateFlow("AppBase")
+    val titulo: StateFlow<String> = _titulo.asStateFlow()
+
+    private val _subtitulo = MutableStateFlow("Cargando...")
+    val subtitulo: StateFlow<String> = _subtitulo.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            delay(2000L)
+            _splashState.value = SplashState.Listo
+        }
+    }
+
+    fun updateTitle(title: String) {
+        _titulo.value = title
+    }
+
+    fun updateSubtitle(subtitle: String) {
+        _subtitulo.value = subtitle
+    }
 }
 
 sealed class SplashState {

@@ -4,6 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.compose'
     id 'com.google.dagger.hilt.android'
 }
+
 android {
     namespace 'com.moto.project.dashboard'
     compileSdk 34
@@ -12,12 +13,15 @@ android {
     kotlinOptions { jvmTarget = '17' }
     buildFeatures { compose true }
 }
+
 dependencies {
     implementation project(':perfil')
     implementation project(':configuracion')
     implementation project(':tema')
     implementation project(':basededatos')
     implementation project(':servicios')
+    implementation libs.androidx.compose.ui.ui
+    implementation libs.androidx.compose.material3.material3
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.androidx.material
