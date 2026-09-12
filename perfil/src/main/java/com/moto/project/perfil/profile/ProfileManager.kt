@@ -1,6 +1,6 @@
 package com.moto.project.perfil.profile
 
-import com.moto.project.basededatos.repository.AppRepository
+import com.moto.project.basededatos.repository.REPOSITORIO_USUARIO
 import com.moto.project.perfil.model.ProfileModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -9,7 +9,7 @@ import javax.inject.Singleton
 
 @Singleton
 class ProfileManager @Inject constructor(
-    private val repository: AppRepository
+    private val repository: REPOSITORIO_USUARIO
 ) {
     val profileData: Flow<ProfileModel> = repository.allUsers.map { users ->
         users.firstOrNull()?.let { user ->

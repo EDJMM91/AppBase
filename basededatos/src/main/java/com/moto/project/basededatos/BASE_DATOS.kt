@@ -20,7 +20,7 @@ import com.moto.project.basededatos.entity.InicioEntity
     version = 2,
     exportSchema = false
 )
-abstract class AppDataBase : RoomDatabase() {
+abstract class BASE_DATOS : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun configDao(): ConfigDao
     abstract fun dashboardDao(): DashboardDao

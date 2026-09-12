@@ -1,4 +1,4 @@
-package com.moto.project.nube.cloud
+package com.moto.project.nube
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CloudManager @Inject constructor(
+class NUBE @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val messaging: FirebaseMessaging,
@@ -21,10 +21,10 @@ class CloudManager @Inject constructor(
     val connectionState: Flow<ConnectionState> = _connectionState
 
     init {
-        setupRemoteConfig()
+        CONFIGURAR_REMOTO()
     }
 
-    private fun setupRemoteConfig() {
+    private fun CONFIGURAR_REMOTO() {
         val settings = FirebaseRemoteConfigSettings.Builder()
             .setMinimumFetchIntervalInSeconds(3600)
             .build()
@@ -32,7 +32,7 @@ class CloudManager @Inject constructor(
         remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
     }
 
-    suspend fun enviaPermisos(permission: String, granted: Boolean): Result<Unit> {
+    suspend fun ENVIAR_PERMISOS(permission: String, granted: Boolean): Result<Unit> {
         return try {
             firestore.collection("permissions").document(permission)
                 .set(mapOf("granted" to granted, "timestamp" to System.currentTimeMillis()))
@@ -42,7 +42,7 @@ class CloudManager @Inject constructor(
         }
     }
 
-    suspend fun saveToCloud(path: String, data: Map<String, Any>): Result<Unit> {
+    suspend fun GUARDAR_EN_NUBE(path: String, data: Map<String, Any>): Result<Unit> {
         return try {
             firestore.collection("data").document(path).set(data)
             Result.success(Unit)
@@ -51,7 +51,7 @@ class CloudManager @Inject constructor(
         }
     }
 
-    suspend fun <T> getFromCloud(collection: String, document: String, clazz: Class<T>): Result<T?> {
+    suspend fun <T> OBTENER_DE_NUBE(collection: String, document: String, clazz: Class<T>): Result<T?> {
         return try {
             val snapshot = firestore.collection(collection).document(document).get().await()
             Result.success(snapshot.toObject(clazz))
@@ -60,7 +60,7 @@ class CloudManager @Inject constructor(
         }
     }
 
-    suspend fun uploadFile(filePath: String, uri: android.net.Uri): Result<String> {
+    suspend fun SUBIR_ARCHIVO(filePath: String, uri: android.net.Uri): Result<String> {
         return try {
             val ref = storage.reference.child(filePath)
             val task = ref.putFile(uri).await()

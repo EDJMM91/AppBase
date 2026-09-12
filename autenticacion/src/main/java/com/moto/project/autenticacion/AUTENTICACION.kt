@@ -1,4 +1,4 @@
-package com.moto.project.autenticacion.auth
+package com.moto.project.autenticacion
 
 import com.google.android.gms.auth.api.identity.GoogleSignIn
 import com.google.android.gms.auth.api.identity.GoogleSignInClient
@@ -11,14 +11,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GoogleAuthManager @Inject constructor(
+class AUTENTICACION @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val googleSignInClient: GoogleSignInClient
 ) {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: Flow<AuthState> = _authState
 
-    suspend fun signInWithGoogle(idToken: String): Result<Unit> {
+    suspend fun INICIAR_SESION_GOOGLE(idToken: String): Result<Unit> {
         return try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             firebaseAuth.signInWithCredential(credential).await()
@@ -30,13 +30,13 @@ class GoogleAuthManager @Inject constructor(
         }
     }
 
-    suspend fun signOut() {
+    suspend fun CIERRAR_SESION() {
         firebaseAuth.signOut()
         googleSignInClient.signOut().await()
         _authState.value = AuthState.Idle
     }
 
-    fun getCurrentUser(): com.google.firebase.auth.FirebaseUser? = firebaseAuth.currentUser
+    fun OBTENER_USUARIO_ACTUAL(): com.google.firebase.auth.FirebaseUser? = firebaseAuth.currentUser
 }
 
 enum class AuthState {
