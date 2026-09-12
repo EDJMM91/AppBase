@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Descarga OTA</string>
+    <string name="ota_checking_update">Verificando actualizaciones...</string>
+    <string name="ota_update_available">Hay una nueva versión disponible</string>
+    <string name="ota_download">Descargar</string>
+    <string name="ota_install">Instalar</string>
+    <string name="ota_no_update">Estás en la última versión</string>
+    <string name="ota_mandatory_update">Esta actualización es obligatoria</string>
+    <string name="ota_downloading">Descargando...</string>
+    <string name="ota_download_complete">Descarga completa</string>
+</resources>

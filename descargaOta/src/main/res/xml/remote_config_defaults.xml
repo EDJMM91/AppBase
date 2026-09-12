@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaults>
+    <entry key="ota_check_interval" value="3600" />
+    <entry key="ota_wifi_only" value="true" />
+    <entry key="ota_auto_download" value="false" />
+    <entry key="ota_min_sdk" value="26" />
+    <entry key="ota_collection" value="ota_updates" />
+    <entry key="ota_firebase_url" value="https://firebasestorage.googleapis.com" />
+</defaults>

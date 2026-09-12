@@ -397,5 +397,83 @@ Cada módulo declara sus propios permisos y actividades en su `AndroidManifest.x
 
 ---
 
+## Regla 16 — Módulo descargaOta
+
+**El módulo `descargaOta` gestiona la descarga de versiones OTA mediante Firebase.**
+
+### Descripción
+Este módulo se conecta a Firebase Firestore para verificar actualizaciones y Firebase Storage para descargar los APKs OTA. Es un módulo compartido que depende de `nube`, `basededatos`, `configuracion` y `tema`.
+
+### Estructura
+```
+descargaOta/src/main/java/com/appbase/descargaota/
+├── OtaManager.kt                    → Gestor principal de OTA
+├── OtaDownloadWorker.kt             → Worker para descarga en segundo plano
+├── di/
+│   └── OtaModule.kt                 → Hilt module para inyección
+├── model/
+│   └── OtaConfig.kt                 → Configuración de OTA
+├── service/
+│   └── OtaFirestoreService.kt       → Servicio Firestore
+└── src/main/res/
+    ├── values/strings.xml
+    ├── values/colors.xml
+    └── xml/remote_config_defaults.xml
+```
+
+### Reglas
+1. **depende de** `nube` (Firebase), `basededatos` (registro de descargas), `configuracion` (URLs), `tema` (estilos)
+2. **Firestore colección**: `ota_updates` para versiones y `ota_downloads` para registro
+3. **Uses-permissions**: `INTERNET`, `ACCESS_NETWORK_STATE`, `WRITE_EXTERNAL_STORAGE`, `REQUEST_INSTALL_PACKAGES`
+4. **Siempre usa** colores y estilos del módulo `tema`
+
+---
+
+## Regla 17 — Graphify Análisis de Grafos
+
+**Graphify es la herramienta oficial de análisis de dependencias del proyecto.**
+
+### Descripción
+Graphify analiza la estructura del proyecto generando un grafo de dependencias entre módulos, archivos, clases y funciones. Ayuda a encontrar fragmentaciones fuera de cada módulo y asegura la máxima independencia.
+
+### Uso de comandos
+```bash
+# Generar el grafo completo (extracción sin LLM)
+python -m graphify update "D:\AppModular\AppBase" --no-cluster
+
+# Generar árbol interactivo con D3.js
+python -m graphify tree --graph "graphify-out/graph.json" --output "GRAPHIFYOUT/GRAPH_TREE.html" --root "D:\AppModular\AppBase"
+
+# Generar diagrama de flujo con Mermaid (Call Flow)
+python -m graphify export callflow-html --graph "graphify-out/graph.json" --output "GRAPHIFYOUT/CALLFLOW.html"
+
+# Reclustering y reporte
+python -m graphify cluster-only "D:\AppModular\AppBase" --graph "graphify-out/graph.json" --no-viz
+
+# Consultas al grafo
+python -m graphify query "¿Qué módulos dependen de basededatos?"
+python -m graphify god-nodes --top 10          # Los más conectados
+python -m graphify affected "basededatos"       # Impacto de cambios
+```
+
+### Salida
+Todo el análisis se guarda en `GRAPHIFYOUT/`:
+| Archivo | Descripción |
+|---------|-------------|
+| `index.html` | Dashboard interactivo principal |
+| `GRAPH_TREE.html` | Árbol D3.js interactivo con zoom/pan |
+| `CALLFLOW.html` | Diagramas Mermaid con call flow |
+| `graph.json` | Datos completos del grafo |
+| `index.md` | Reporte de análisis |
+
+### Reglas
+1. **`GRAPHIFYOUT/`** está en la raíz del proyecto
+2. **Regenerar** el grafo cada vez que se agregue un nuevo módulo
+3. **Verificar** la independencia de módulos con `graphify query`
+4. **Buscar fragmentaciones** con `graphify affected`
+5. **El `index.html`** es la vista principal interactiva
+
+---
+
 *Última actualización: Septiembre 2026*
 *AppBase — Reglas Arquitectónicas*

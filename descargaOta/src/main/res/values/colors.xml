@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#1565C0</color>
+    <color name="secondary">#0288D1</color>
+    <color name="background">#F5F5F5</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="error">#B00020</color>
+    <color name="onPrimary">#FFFFFF</color>
+    <color name="onBackground">#212121</color>
+    <color name="onSurface">#212121</color>
+    <color name="otaProgress">#0288D1</color>
+    <color name="otaSuccess">#4CAF50</color>
+    <color name="otaWarning">#FF9800</color>
+</resources>

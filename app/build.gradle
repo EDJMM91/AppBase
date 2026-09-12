@@ -25,6 +25,7 @@ dependencies {
     implementation project(':basededatos')
     implementation project(':servicios')
     implementation project(':metricas')
+    implementation project(':descargaOta')
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.androidx.material

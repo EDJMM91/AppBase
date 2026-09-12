@@ -69,6 +69,10 @@ composeUi = "1.6.2"
 composeMaterial3 = "1.2.1"
 composeFoundation = "1.6.2"
 
+# WorkManager
+workRuntime = "1.3.1"
+workRuntimeKtx = "1.3.1"
+
 [libraries]
 # Kotlin
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
@@ -132,6 +136,9 @@ security-crypto = { module = "androidx.security:security-crypto", version.ref = 
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "composeUi" }
 compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "composeMaterial3" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "composeFoundation" }
+
+# WorkManager
+work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 # Koin
 koin-core = { module = "io.insert-koin:koin-core", version = "3.5.0" }

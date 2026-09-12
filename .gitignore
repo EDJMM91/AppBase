@@ -18,6 +18,9 @@ local.properties
 .DS_Store
 Thumbs.db
 
+# Generated graphify output
+graphify-out/
+
 # Build outputs
 app/build/
 inicio/build/
@@ -30,6 +33,10 @@ perfil/build/
 basededatos/build/
 servicios/build/
 metricas/build/
+descargaOta/build/
+
+# GRAPHIFYOUT is tracked (interactive analysis output)
+# GRAPHIFYOUT/
 
 # Gradle
 gradle/app/

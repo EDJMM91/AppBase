@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AppBase — Complete Call Flow &amp; Architecture Documentation</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #0f172a; --surface: #1e293b; --border: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+  --warn: #fbbf24; --err: #f87171; --ok: #34d399;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 2.4rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+h2 { font-size: 1.7rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+h3 { font-size: 1.25rem; margin: 32px 0 12px; color: var(--accent); }
+h4 { font-size: 1.05rem; margin: 20px 0 8px; color: var(--warn); }
+p { margin: 8px 0; color: var(--muted); }
+.subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 32px; }
+.mermaid { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; overflow-x: auto; position: relative; }
+.mermaid.is-enhanced { padding: 0; overflow: hidden; min-height: 260px; }
+.mermaid-viewport { padding: 54px 24px 24px; overflow: hidden; cursor: grab; touch-action: none; min-height: 260px; }
+.mermaid-viewport.is-dragging { cursor: grabbing; }
+.mermaid-viewport svg { max-width: none !important; height: auto; transform-origin: 0 0; transition: transform 120ms ease; }
+.mermaid-toolbar { position: absolute; top: 10px; right: 10px; z-index: 3; display: flex; align-items: center; gap: 6px; padding: 6px; background: rgba(15,23,42,0.92); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+.mermaid-toolbar button, .mermaid-toolbar .zoom-level { height: 28px; min-width: 32px; border: 1px solid var(--border); border-radius: 6px; background: #1e293b; color: var(--text); font: 600 0.78rem system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; }
+.mermaid-toolbar button { cursor: pointer; }
+.mermaid-toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+.mermaid-toolbar .zoom-level { min-width: 52px; color: var(--muted); background: transparent; }
+.call-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+.call-table th { background: #1a2744; color: var(--accent); text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+.call-table td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: top; }
+.call-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+.tag-async { background: #7c3aed33; color: #a78bfa; }
+.tag-class { background: #05966933; color: var(--ok); }
+.tag-func { background: #2563eb33; color: var(--accent); }
+.tag-cmd { background: #d9770633; color: var(--warn); }
+.tag-endpoint { background: #dc262633; color: var(--err); }
+.tag-hook { background: #db277733; color: #f472b6; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 16px 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 16px 0; }
+.arrow-chain { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--accent); padding: 10px; background: rgba(56,189,248,0.06); border-radius: 6px; }
+code { font-family: 'Fira Code', 'Cascadia Code', monospace; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+ul, ol { margin: 8px 0 8px 24px; color: var(--muted); }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.nav { position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.9rem; }
+.nav a { text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+@media (max-width: 768px) { .container { padding: 16px; } h1 { font-size: 1.8rem; } }
+
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>AppBase — Complete Call Flow &amp; Architecture Documentation</h1>
+<p class="subtitle">Generated from graphify knowledge graph: 427 nodes, 464 edges, 66 communities. Commit: 7d8d2e7</p>
+
+<div class="nav">
+    <a href="#overview">Architecture Overview</a>
+    <a href="#extract-pipeline">Extraction Pipeline</a>
+    <a href="#build-graph">Graph Build</a>
+    <a href="#cli-skills">CLI &amp; Skill Installers</a>
+    <a href="#reglas-md-appbase">REGLAS.md — AppBase</a>
+    <a href="#cloudconnectionstate">CloudConnectionState</a>
+    <a href="#regla-4-m-dulo-basededatos-como-gestor-central-d">Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos</a>
+    <a href="#regla-2-m-dulo-tema-como-nica-fuente-de-estilos">Regla 2 — Módulo Tema como Única Fuente de Estilos</a>
+    <a href="#regla-1-independencia-de-m-dulos">Regla 1 — Independencia de Módulos</a>
+    <a href="#regla-3-versi-ncatalog-libs-versions-toml-como-n">Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones</a>
+    <a href="#regla-5-nomenclatura-de-archivos-por-m-dulo">Regla 5 — Nomenclatura de Archivos por Módulo</a>
+    <a href="#regla-6-gesti-n-de-permisos-y-manifests">Regla 6 — Gestión de Permisos y Manifests</a>
+    <a href="#regla-8-di-con-hilt-y-koin">Regla 8 — DI con Hilt y Koin</a>
+    <a href="#regla-13-no-archivos-basura">Regla 13 — No Archivos Basura</a>
+    <a href="#regla-7-registro-de-m-dulos">Regla 7 — Registro de Módulos</a>
+    <a href="#other">Other</a>
+</div>
+
+<!-- ====== Architecture Overview ====== -->
+<h2 id="overview">1. Architecture Overview</h2>
+
+<div class="mermaid">
+
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>281 nodes</small>")
+    class EXTRACT_PIPELINE_5F350230 module;
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>41 nodes</small>")
+    class BUILD_GRAPH_321CBB04 module;
+    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>39 nodes</small>")
+    class CLI_SKILLS_9964CBB8 module;
+    REGLAS_MD_APPBASE_87E49CEC("REGLAS.md — AppBase<br/><small>14 nodes</small>")
+    class REGLAS_MD_APPBASE_87E49CEC module;
+    CLOUDCONNECTIONSTATE_1766D161("CloudConnectionState<br/><small>12 nodes</small>")
+    class CLOUDCONNECTIONSTATE_1766D161 module;
+    REGLA_4_M_DULO_BASEDEDATOS_COMO_GESTOR_CENTRAL_D_DDB31CF8("Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos<br/><small>8 nodes</small>")
+    class REGLA_4_M_DULO_BASEDEDATOS_COMO_GESTOR_CENTRAL_D_DDB31CF8 module;
+    REGLA_2_M_DULO_TEMA_COMO_NICA_FUENTE_DE_ESTILOS_9C191A9E("Regla 2 — Módulo Tema como Única Fuente de Estilos<br/><small>5 nodes</small>")
+    class REGLA_2_M_DULO_TEMA_COMO_NICA_FUENTE_DE_ESTILOS_9C191A9E module;
+    REGLA_1_INDEPENDENCIA_DE_M_DULOS_50F12E4D("Regla 1 — Independencia de Módulos<br/><small>5 nodes</small>")
+    class REGLA_1_INDEPENDENCIA_DE_M_DULOS_50F12E4D module;
+    REGLA_3_VERSI_NCATALOG_LIBS_VERSIONS_TOML_COMO_N_EB3939F2("Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones<br/><small>5 nodes</small>")
+    class REGLA_3_VERSI_NCATALOG_LIBS_VERSIONS_TOML_COMO_N_EB3939F2 module;
+    REGLA_5_NOMENCLATURA_DE_ARCHIVOS_POR_M_DULO_0AD73C51("Regla 5 — Nomenclatura de Archivos por Módulo<br/><small>4 nodes</small>")
+    class REGLA_5_NOMENCLATURA_DE_ARCHIVOS_POR_M_DULO_0AD73C51 module;
+    REGLA_6_GESTI_N_DE_PERMISOS_Y_MANIFESTS_32ECB0A1("Regla 6 — Gestión de Permisos y Manifests<br/><small>3 nodes</small>")
+    class REGLA_6_GESTI_N_DE_PERMISOS_Y_MANIFESTS_32ECB0A1 module;
+    REGLA_8_DI_CON_HILT_Y_KOIN_529329E5("Regla 8 — DI con Hilt y Koin<br/><small>3 nodes</small>")
+    class REGLA_8_DI_CON_HILT_Y_KOIN_529329E5 module;
+    REGLA_13_NO_ARCHIVOS_BASURA_C7BAB74C("Regla 13 — No Archivos Basura<br/><small>2 nodes</small>")
+    class REGLA_13_NO_ARCHIVOS_BASURA_C7BAB74C module;
+    REGLA_7_REGISTRO_DE_M_DULOS_C590398D("Regla 7 — Registro de Módulos<br/><small>2 nodes</small>")
+    class REGLA_7_REGISTRO_DE_M_DULOS_C590398D module;
+    OTHER_D0941E68("Other<br/><small>3 nodes</small>")
+    class OTHER_D0941E68 module;
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_13_NO_ARCHIVOS_BASURA_C7BAB74C
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_1_INDEPENDENCIA_DE_M_DULOS_50F12E4D
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_2_M_DULO_TEMA_COMO_NICA_FUENTE_DE_ESTILOS_9C191A9E
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_3_VERSI_NCATALOG_LIBS_VERSIONS_TOML_COMO_N_EB3939F2
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_4_M_DULO_BASEDEDATOS_COMO_GESTOR_CENTRAL_D_DDB31CF8
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_5_NOMENCLATURA_DE_ARCHIVOS_POR_M_DULO_0AD73C51
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_6_GESTI_N_DE_PERMISOS_Y_MANIFESTS_32ECB0A1
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_7_REGISTRO_DE_M_DULOS_C590398D
+    REGLAS_MD_APPBASE_87E49CEC -->|contains| REGLA_8_DI_CON_HILT_Y_KOIN_529329E5
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h4>Architecture Layers</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
+      <tr><td>Extraction Pipeline</td><td>281</td><td><code>0, 2, 5, 6, 8, 10, 9, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 30, 32, 33, 34, 35, 36, 39, 40, 41, 42, 43, 44, 45, 46</code></td></tr><tr><td>Graph Build</td><td>41</td><td><code>1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 61, 62, 64</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>39</td><td><code>3, 4</code></td></tr><tr><td>REGLAS.md — AppBase</td><td>14</td><td><code>7</code></td></tr><tr><td>CloudConnectionState</td><td>12</td><td><code>11</code></td></tr><tr><td>Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos</td><td>8</td><td><code>18</code></td></tr><tr><td>Regla 2 — Módulo Tema como Única Fuente de Estilos</td><td>5</td><td><code>27</code></td></tr><tr><td>Regla 1 — Independencia de Módulos</td><td>5</td><td><code>28</code></td></tr><tr><td>Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones</td><td>5</td><td><code>29</code></td></tr><tr><td>Regla 5 — Nomenclatura de Archivos por Módulo</td><td>4</td><td><code>31</code></td></tr><tr><td>Regla 6 — Gestión de Permisos y Manifests</td><td>3</td><td><code>37</code></td></tr><tr><td>Regla 8 — DI con Hilt y Koin</td><td>3</td><td><code>38</code></td></tr><tr><td>Regla 13 — No Archivos Basura</td><td>2</td><td><code>47</code></td></tr><tr><td>Regla 7 — Registro de Módulos</td><td>2</td><td><code>48</code></td></tr><tr><td>Other</td><td>3</td><td><code>58, 63, 65</code></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Core Flow</h4>
+    <div class="arrow-chain">Extraction Pipeline -&gt; Graph Build -&gt; CLI &amp; Skill Installers -&gt; REGLAS.md — AppBase -&gt; Regla 8 — DI con Hilt y Koin -&gt; CloudConnectionState -&gt; Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos</div>
+  </div>
+</div>
+<div class="grid">
+  <div class="card">
+    <h4>Graph Report Highlights</h4>
+    <ul>
+      <li>427 nodes · 464 edges · 66 communities (50 shown, 16 thin omitted)</li>
+      <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)</li>
+      <li>Token cost: 0 input · 0 output</li>
+      <li>1. `AppRepository` - 27 edges</li>
+      <li>2. `REGLAS.md — AppBase` - 17 edges</li>
+      <li>3. `PerfilEntity` - 11 edges</li>
+    </ul>
+  </div>
+</div>
+<hr>
+<!-- ====== 2. Extraction Pipeline ====== -->
+<h2 id="extract-pipeline">2. Extraction Pipeline</h2>
+<p>Extraction Pipeline groups implementation around com, moto, project, basededatos, mostly in basededatos/repository/AppRepository.kt, project/basededatos/AppDataBase.kt, basededatos/dao/UserDao.kt. This section covers 281 nodes and 317 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Extraction Pipeline (281 nodes, 317 edges)
+    subgraph extract_pipeline_autenticacion_auth_GoogleAuthMa_82e3c5a8["autenticacion/auth/GoogleAuthManager.kt"]
+        autenticacion_src_main_java_com_moto_project_aut_3e912fb1("GoogleAuthManager<br/><small>autenticacion/auth/GoogleAuthManager.kt</small>")
+        autenticacion_src_main_java_com_moto_project_aut_7f81f0ed("getCurrentUser()<br/><small>autenticacion/auth/GoogleAuthManager.kt</small>")
+        autenticacion_src_main_java_com_moto_project_aut_8a6dfefe("signInWithGoogle()<br/><small>autenticacion/auth/GoogleAuthManager.kt</small>")
+        autenticacion_src_main_java_com_moto_project_aut_3a7aa9a5("signOut()<br/><small>autenticacion/auth/GoogleAuthManager.kt</small>")
+    end
+    subgraph extract_pipeline_autenticacion_di_AuthModule_kt_567a420f["autenticacion/di/AuthModule.kt"]
+        autenticacion_src_main_java_com_moto_project_aut_71c35a74("AuthModule<br/><small>autenticacion/di/AuthModule.kt</small>")
+        autenticacion_src_main_java_com_moto_project_aut_1988a0c5("provideFirebaseAuth()<br/><small>autenticacion/di/AuthModule.kt</small>")
+        autenticacion_src_main_java_com_moto_project_aut_308940b9("provideGoogleSignInClient()<br/><small>autenticacion/di/AuthModule.kt</small>")
+    end
+    subgraph extract_pipeline_app_di_AppModule_kt_7b384a2b["app/di/AppModule.kt"]
+        app_src_main_java_com_moto_project_app_di_appmod_d347de8e("AppModule<br/><small>app/di/AppModule.kt</small>")
+        app_src_main_java_com_moto_project_app_di_appmod_861cead0("provideAppContext()<br/><small>app/di/AppModule.kt</small>")
+    end
+    subgraph extract_pipeline_project_app_MainActivity_kt_f7e15a84["project/app/MainActivity.kt"]
+        app_src_main_java_com_moto_project_app_mainactiv_18696391("MainActivity<br/><small>project/app/MainActivity.kt</small>")
+        app_src_main_java_com_moto_project_app_mainactiv_874bf16a("onCreate()<br/><small>project/app/MainActivity.kt</small>")
+    end
+    subgraph extract_pipeline_project_basededatos_AppDataBase_2aaa6a12["project/basededatos/AppDataBase.kt"]
+        basededatos_src_main_java_com_moto_project_based_4f5c4bb0("AppDataBase<br/><small>project/basededatos/AppDataBase.kt</small>")
+        basededatos_src_main_java_com_moto_project_based_973ad72c("configDao()<br/><small>project/basededatos/AppDataBase.kt</small>")
+    end
+    basededatos_src_main_java_com_moto_project_based_22234003("ConfigDao<br/><small>basededatos/dao/ConfigDao.kt</small>")
+    basededatos_src_main_java_com_moto_project_based_2cf5d779("PerfilDao<br/><small>basededatos/dao/PerfilDao.kt</small>")
+    basededatos_src_main_java_com_moto_project_based_ddb4f625("UserDao<br/><small>basededatos/dao/UserDao.kt</small>")
+    basededatos_src_main_java_com_moto_project_based_049c7028("AppRepository<br/><small>basededatos/repository/AppRepository.kt</small>")
+    nube_src_main_java_com_moto_project_nube_cloud_c_02e12548("CloudManager<br/><small>nube/cloud/CloudManager.kt</small>")
+    app_src_main_java_com_moto_project_app_mainactiv_18696391 -->|method| app_src_main_java_com_moto_project_app_mainactiv_874bf16a
+    app_src_main_java_com_moto_project_app_di_appmod_d347de8e -->|method| app_src_main_java_com_moto_project_app_di_appmod_861cead0
+    autenticacion_src_main_java_com_moto_project_aut_3e912fb1 -->|method| autenticacion_src_main_java_com_moto_project_aut_7f81f0ed
+    autenticacion_src_main_java_com_moto_project_aut_3e912fb1 -->|method| autenticacion_src_main_java_com_moto_project_aut_8a6dfefe
+    autenticacion_src_main_java_com_moto_project_aut_3e912fb1 -->|method| autenticacion_src_main_java_com_moto_project_aut_3a7aa9a5
+    autenticacion_src_main_java_com_moto_project_aut_71c35a74 -->|method| autenticacion_src_main_java_com_moto_project_aut_1988a0c5
+    autenticacion_src_main_java_com_moto_project_aut_71c35a74 -->|method| autenticacion_src_main_java_com_moto_project_aut_308940b9
+    basededatos_src_main_java_com_moto_project_based_4f5c4bb0 -->|method| basededatos_src_main_java_com_moto_project_based_973ad72c
+    %% Omitted for readability: 263 nodes, 0 edges
+    class autenticacion_src_main_java_com_moto_project_aut_3e912fb1 klass;
+    class autenticacion_src_main_java_com_moto_project_aut_7f81f0ed function;
+    class autenticacion_src_main_java_com_moto_project_aut_8a6dfefe function;
+    class autenticacion_src_main_java_com_moto_project_aut_3a7aa9a5 function;
+    class autenticacion_src_main_java_com_moto_project_aut_71c35a74 klass;
+    class autenticacion_src_main_java_com_moto_project_aut_1988a0c5 function;
+    class autenticacion_src_main_java_com_moto_project_aut_308940b9 entry;
+    class app_src_main_java_com_moto_project_app_di_appmod_d347de8e klass;
+    class app_src_main_java_com_moto_project_app_di_appmod_861cead0 function;
+    class app_src_main_java_com_moto_project_app_mainactiv_18696391 klass;
+    class app_src_main_java_com_moto_project_app_mainactiv_874bf16a function;
+    class basededatos_src_main_java_com_moto_project_based_4f5c4bb0 klass;
+    class basededatos_src_main_java_com_moto_project_based_973ad72c function;
+    class basededatos_src_main_java_com_moto_project_based_22234003 klass;
+    class basededatos_src_main_java_com_moto_project_based_2cf5d779 klass;
+    class basededatos_src_main_java_com_moto_project_based_ddb4f625 klass;
+    class basededatos_src_main_java_com_moto_project_based_049c7028 klass;
+    class nube_src_main_java_com_moto_project_nube_cloud_c_02e12548 klass;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>.configDao()</code><br><small style="color:var(--muted)">project/basededatos/AppDataBase.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AppDataBase</code><br><small style="color:var(--muted)">project/basededatos/AppDataBase.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>.perfilDao()</code><br><small style="color:var(--muted)">project/basededatos/AppDataBase.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>AppDataBase</code><br><small style="color:var(--muted)">project/basededatos/AppDataBase.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.perfilDao() node in project/basededatos/AppDataBase.kt.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>ConfigDao.kt</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>ConfigDao</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>getAllConfig()</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small><br><code>getConfigByKey()</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small><br><code>insertConfig()</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small><br>+1 more</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>.getConfigByKey()</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ConfigDao</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>.getAllConfig()</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ConfigDao</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>Flow</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Flow node in project.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>.insertConfig()</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ConfigDao</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>.updateConfig()</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ConfigDao</code><br><small style="color:var(--muted)">basededatos/dao/ConfigDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>PerfilDao.kt</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>PerfilDao.kt node in basededatos/dao/PerfilDao.kt.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>PerfilDao</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>deleteProfile()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small><br><code>getAllProfiles()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small><br><code>getProfileById()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small><br>+2 more</td>
+  <td>PerfilDao node in basededatos/dao/PerfilDao.kt.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>.getProfileById()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>PerfilDao</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.getProfileById() node in basededatos/dao/PerfilDao.kt.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>.getAllProfiles()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>PerfilDao</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.getAllProfiles() node in basededatos/dao/PerfilDao.kt.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Flow</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Flow node in project.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>.insertProfile()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>PerfilDao</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.insertProfile() node in basededatos/dao/PerfilDao.kt.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>.updateProfile()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>PerfilDao</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.updateProfile() node in basededatos/dao/PerfilDao.kt.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>.deleteProfile()</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>PerfilDao</code><br><small style="color:var(--muted)">basededatos/dao/PerfilDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.deleteProfile() node in basededatos/dao/PerfilDao.kt.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>UserDao.kt</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>UserDao.kt node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>UserDao</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>deleteAllUsers()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small><br><code>deleteUser()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small><br><code>getAllUsers()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small><br>+3 more</td>
+  <td>UserDao node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>.getUserById()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>UserDao</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.getUserById() node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>.getAllUsers()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>UserDao</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.getAllUsers() node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>Flow</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Flow node in project.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>.insertUser()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>UserDao</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.insertUser() node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>.insertAllUsers()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>UserDao</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.insertAllUsers() node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>.deleteUser()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>UserDao</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.deleteUser() node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>.deleteAllUsers()</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>UserDao</code><br><small style="color:var(--muted)">basededatos/dao/UserDao.kt</small></td>
+  <td>No direct outbound edge</td>
+  <td>.deleteAllUsers() node in basededatos/dao/UserDao.kt.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>ConfigEntity.kt</code><br><small style="color:var(--muted)">basededatos/entity/ConfigEntity.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>ConfigEntity</code><br><small style="color:var(--muted)">basededatos/entity/ConfigEntity.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Reads, resolves, or persists project configuration.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>PerfilEntity.kt</code><br><small style="color:var(--muted)">basededatos/entity/PerfilEntity.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>PerfilEntity.kt node in basededatos/entity/PerfilEntity.kt.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>PerfilEntity</code><br><small style="color:var(--muted)">basededatos/entity/PerfilEntity.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>PerfilEntity node in basededatos/entity/PerfilEntity.kt.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>basededatos/repository/AppRepository.kt</code></td><td>20 nodes</td></tr>
+<tr><td><code>project/basededatos/AppDataBase.kt</code></td><td>8 nodes</td></tr>
+<tr><td><code>basededatos/dao/UserDao.kt</code></td><td>8 nodes</td></tr>
+<tr><td><code>basededatos/dao/PerfilDao.kt</code></td><td>7 nodes</td></tr>
+<tr><td><code>project/metricas/MetricasManager.kt</code></td><td>7 nodes</td></tr>
+<tr><td><code>nube/cloud/CloudManager.kt</code></td><td>7 nodes</td></tr>
+<tr><td><code>basededatos/dao/ConfigDao.kt</code></td><td>6 nodes</td></tr>
+<tr><td><code>basededatos/dao/DashboardDao.kt</code></td><td>6 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: references x133, method x95, contains x74, calls x7. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 3. Graph Build ====== -->
+<h2 id="build-graph">3. Graph Build</h2>
+<p>Graph Build groups implementation around readmemd, buildgradle, gradle, app, mostly in README.md, app/build.gradle, autenticacion/build.gradle. This section covers 41 nodes and 26 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Graph Build (41 nodes, 26 edges)
+    subgraph build_graph_README_md_df5bf028["README.md"]
+        readme_documentaci_n_oficial_base_reusable_arqui_2b1b926e("Documentación Oficial — Base Reusable A...<br/><small>README.md</small>")
+        readme_2_reglas_de_arquitectura_7cb53bbd("2. Reglas de Arquitectura<br/><small>README.md</small>")
+        readme_4_m_todos_y_patrones_de_c_digo_dbbf5d73("4. Métodos y Patrones de Código<br/><small>README.md</small>")
+        readme_3_build_variants_variantes_de_compilaci_n_1f51cbdd("3. Build Variants (Variantes de Compila...<br/><small>README.md</small>")
+        readme_f78a71af("README.md")
+        readme_5_configuraci_n_de_build_ac0aa3cd("5. Configuración de Build<br/><small>README.md</small>")
+    end
+    app_build_7939d4d3("app/build.gradle")
+    autenticacion_build_fb63e775("autenticacion/build.gradle")
+    basededatos_build_1c239f80("basededatos/build.gradle")
+    build_80754af9("build.gradle")
+    configuracion_build_3c110c4c("configuracion/build.gradle")
+    dashboard_build_586221ea("dashboard/build.gradle")
+    descargaota_build_5527ad6f("descargaOta/build.gradle")
+    gradle_build_88c84a5a("gradle/build.gradle")
+    inicio_build_fcf46536("inicio/build.gradle")
+    metricas_build_3b616171("metricas/build.gradle")
+    nube_build_cf96dee4("nube/build.gradle")
+    perfil_build_f619e897("perfil/build.gradle")
+    readme_documentaci_n_oficial_base_reusable_arqui_2b1b926e -->|contains| readme_2_reglas_de_arquitectura_7cb53bbd
+    readme_documentaci_n_oficial_base_reusable_arqui_2b1b926e -->|contains| readme_3_build_variants_variantes_de_compilaci_n_1f51cbdd
+    readme_documentaci_n_oficial_base_reusable_arqui_2b1b926e -->|contains| readme_4_m_todos_y_patrones_de_c_digo_dbbf5d73
+    readme_documentaci_n_oficial_base_reusable_arqui_2b1b926e -->|contains| readme_5_configuraci_n_de_build_ac0aa3cd
+    %% Omitted for readability: 23 nodes, 0 edges
+    class readme_documentaci_n_oficial_base_reusable_arqui_2b1b926e concept;
+    class readme_2_reglas_de_arquitectura_7cb53bbd concept;
+    class readme_4_m_todos_y_patrones_de_c_digo_dbbf5d73 concept;
+    class readme_3_build_variants_variantes_de_compilaci_n_1f51cbdd concept;
+    class readme_f78a71af concept;
+    class readme_5_configuraci_n_de_build_ac0aa3cd concept;
+    class app_build_7939d4d3 function;
+    class autenticacion_build_fb63e775 function;
+    class basededatos_build_1c239f80 function;
+    class build_80754af9 function;
+    class configuracion_build_3c110c4c function;
+    class dashboard_build_586221ea function;
+    class descargaota_build_5527ad6f function;
+    class gradle_build_88c84a5a function;
+    class inicio_build_fcf46536 function;
+    class metricas_build_3b616171 function;
+    class nube_build_cf96dee4 function;
+    class perfil_build_f619e897 function;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>README.md</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing README.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>AppBase</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing AppBase.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Documentación Oficial — Base Reusable Arquitectura Multimodulo Feature-Based</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Documentación Oficial — Base Reusable Arquitectura Multimodulo Feature-Based.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>1. Estructura General</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 1. Estructura General.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>2. Reglas de Arquitectura</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2. Reglas de Arquitectura.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>2.1 Manifests Descentralizados</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2.1 Manifests Descentralizados.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>2.2 Independencia de Gradle</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2.2 Independencia de Gradle.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>2.3 App como Ensamblador</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2.3 App como Ensamblador.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>2.4 Inyección de Dependencias</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2.4 Inyección de Dependencias.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>2.5 Inter-Module Dependency</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2.5 Inter-Module Dependency.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>2.6 Navegación</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2.6 Navegación.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>2.7 Catálogo de Versiones</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2.7 Catálogo de Versiones.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>3. Build Variants (Variantes de Compilación)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3. Build Variants (Variantes de Compilación).</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>3.1 Variante `desarrollador` (Debug Admin)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3.1 Variante `desarrollador` (Debug Admin).</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>3.2 Variante `norma` (Release Normal)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3.2 Variante `norma` (Release Normal).</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>3.3 Diferencias en Código</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3.3 Diferencias en Código.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>4. Métodos y Patrones de Código</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4. Métodos y Patrones de Código.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>4.1 Singleton con Hilt</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4.1 Singleton con Hilt.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>4.2 Repository Pattern (basededatos)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4.2 Repository Pattern (basededatos).</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>4.3 ViewModel con Hilt</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4.3 ViewModel con Hilt.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>4.4 Splash Screen Pattern</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4.4 Splash Screen Pattern.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>5. Configuración de Build</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 5. Configuración de Build.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>5.1 Archivos de Configuración</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 5.1 Archivos de Configuración.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>6. Directorios de Construcción</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 6. Directorios de Construcción.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>7. Reglas de Desarrollo</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 7. Reglas de Desarrollo.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>8. Comandos de Compilación</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 8. Comandos de Compilación.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>9. Tecnologías Utilizadas</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 9. Tecnologías Utilizadas.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>app/build.gradle</code><br><small style="color:var(--muted)">app/build.gradle</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>app/build.gradle node in app/build.gradle.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>autenticacion/build.gradle</code><br><small style="color:var(--muted)">autenticacion/build.gradle</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>autenticacion/build.gradle node in autenticacion/build.gradle.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>basededatos/build.gradle</code><br><small style="color:var(--muted)">basededatos/build.gradle</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>basededatos/build.gradle node in basededatos/build.gradle.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>27 nodes</td></tr>
+<tr><td><code>app/build.gradle</code></td><td>1 nodes</td></tr>
+<tr><td><code>autenticacion/build.gradle</code></td><td>1 nodes</td></tr>
+<tr><td><code>basededatos/build.gradle</code></td><td>1 nodes</td></tr>
+<tr><td><code>build.gradle</code></td><td>1 nodes</td></tr>
+<tr><td><code>configuracion/build.gradle</code></td><td>1 nodes</td></tr>
+<tr><td><code>dashboard/build.gradle</code></td><td>1 nodes</td></tr>
+<tr><td><code>descargaOta/build.gradle</code></td><td>1 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x26. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 4. CLI & Skill Installers ====== -->
+<h2 id="cli-skills">4. CLI &amp; Skill Installers</h2>
+<p>CLI &amp; Skill Installers groups implementation around cpp, metricas, algorithm, include, mostly in src/metrics/native-lib.cpp, cpp/include/metrics.h, cpp/include/metrics.h. This section covers 39 nodes and 57 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: CLI &amp; Skill Installers (39 nodes, 57 edges)
+    subgraph cli_skills_src_algorithm_stats_cpp_d51a9293["src/algorithm/stats.cpp"]
+        cpp_src_algorithm_stats_calculatemean_794e0509("calculateMean()<br/><small>src/algorithm/stats.cpp</small>")
+        cpp_src_algorithm_stats_60bc2de6("cpp/src/algorithm/stats.cpp")
+        cpp_src_algorithm_stats_calculatemetrics_ae33a8ca("calculateMetrics()<br/><small>src/algorithm/stats.cpp</small>")
+        cpp_src_algorithm_stats_calculatestandarddeviati_51602ad3("calculateStandardDeviation()<br/><small>src/algorithm/stats.cpp</small>")
+        metricas_src_main_cpp_src_algorithm_stats_c80c03c3("main/cpp/src/algorithm/stats.cpp")
+    end
+    subgraph cli_skills_External_generated_0c226fa1["External / generated"]
+        cpp_include_metrics_h_string_f8f6fd24("string")
+        cpp_src_metrics_optimizer_cpp_vector_669469a7("vector")
+        metricas_src_main_cpp_src_algorithm_optimizer_cp_912ffe2c("vector")
+        metricas_src_main_cpp_src_metrics_native_lib_cpp_bdb879a6("vector")
+    end
+    subgraph cli_skills_src_metrics_native_lib_cpp_098dce2c["src/metrics/native-lib.cpp"]
+        metricas_src_main_cpp_src_metrics_native_lib_cal_2ab62582("calculateMetrics()<br/><small>src/metrics/native-lib.cpp</small>")
+        metricas_src_main_cpp_src_metrics_native_lib_cal_40c10cc9("calculateMean()<br/><small>src/metrics/native-lib.cpp</small>")
+        metricas_src_main_cpp_src_metrics_native_lib_cal_a9dbcffa("calculateStandardDeviation()<br/><small>src/metrics/native-lib.cpp</small>")
+        metricas_src_main_cpp_src_metrics_native_lib_fadd7d4a("native-lib.cpp")
+    end
+    subgraph cli_skills_cpp_include_metrics_h_b12d4e89["cpp/include/metrics.h"]
+        cpp_include_metrics_9051c6c3("cpp/include/metrics.h")
+        metricas_src_main_cpp_include_metrics_af1a9d98("main/cpp/include/metrics.h")
+    end
+    metricas_src_main_cpp_include_algorithm_d489f250("algorithm.h")
+    metricas_src_main_cpp_src_algorithm_optimizer_5f59b6da("algorithm/optimizer.cpp")
+    cpp_src_metrics_optimizer_d305c404("metrics/optimizer.cpp")
+    cpp_src_algorithm_stats_calculatemean_794e0509 -->|calls| cpp_src_algorithm_stats_calculatemetrics_ae33a8ca
+    cpp_src_algorithm_stats_calculatemean_794e0509 -->|calls| cpp_src_algorithm_stats_calculatestandarddeviati_51602ad3
+    metricas_src_main_cpp_src_metrics_native_lib_cal_2ab62582 -->|calls| metricas_src_main_cpp_src_metrics_native_lib_cal_40c10cc9
+    metricas_src_main_cpp_src_metrics_native_lib_cal_2ab62582 -->|calls| metricas_src_main_cpp_src_metrics_native_lib_cal_a9dbcffa
+    metricas_src_main_cpp_src_metrics_native_lib_cal_40c10cc9 -->|calls| metricas_src_main_cpp_src_metrics_native_lib_cal_a9dbcffa
+    cpp_include_metrics_9051c6c3 -->|imports| cpp_include_metrics_h_string_f8f6fd24
+    cpp_include_metrics_h_string_f8f6fd24 -->|imports| metricas_src_main_cpp_include_algorithm_d489f250
+    cpp_include_metrics_h_string_f8f6fd24 -->|imports| metricas_src_main_cpp_include_metrics_af1a9d98
+    cpp_include_metrics_h_string_f8f6fd24 -->|imports| metricas_src_main_cpp_src_metrics_native_lib_fadd7d4a
+    cpp_src_algorithm_stats_60bc2de6 -->|imports| metricas_src_main_cpp_include_algorithm_d489f250
+    cpp_src_metrics_optimizer_d305c404 -->|imports| metricas_src_main_cpp_include_algorithm_d489f250
+    cpp_src_metrics_optimizer_d305c404 -->|imports| cpp_src_metrics_optimizer_cpp_vector_669469a7
+    metricas_src_main_cpp_include_algorithm_d489f250 -->|imports| metricas_src_main_cpp_src_algorithm_optimizer_5f59b6da
+    metricas_src_main_cpp_include_algorithm_d489f250 -->|imports| metricas_src_main_cpp_src_algorithm_stats_c80c03c3
+    metricas_src_main_cpp_include_algorithm_d489f250 -->|imports| metricas_src_main_cpp_src_metrics_native_lib_fadd7d4a
+    metricas_src_main_cpp_src_algorithm_optimizer_5f59b6da -->|imports| metricas_src_main_cpp_src_algorithm_optimizer_cp_912ffe2c
+    metricas_src_main_cpp_src_metrics_native_lib_fadd7d4a -->|imports| metricas_src_main_cpp_src_metrics_native_lib_cpp_bdb879a6
+    %% Omitted for readability: 21 nodes, 0 edges
+    class cpp_src_algorithm_stats_calculatemean_794e0509 function;
+    class cpp_src_algorithm_stats_60bc2de6 function;
+    class cpp_src_algorithm_stats_calculatemetrics_ae33a8ca function;
+    class cpp_src_algorithm_stats_calculatestandarddeviati_51602ad3 function;
+    class metricas_src_main_cpp_src_algorithm_stats_c80c03c3 function;
+    class cpp_include_metrics_h_string_f8f6fd24 function;
+    class cpp_src_metrics_optimizer_cpp_vector_669469a7 function;
+    class metricas_src_main_cpp_src_algorithm_optimizer_cp_912ffe2c function;
+    class metricas_src_main_cpp_src_metrics_native_lib_cpp_bdb879a6 function;
+    class metricas_src_main_cpp_src_metrics_native_lib_cal_2ab62582 function;
+    class metricas_src_main_cpp_src_metrics_native_lib_cal_40c10cc9 function;
+    class metricas_src_main_cpp_src_metrics_native_lib_cal_a9dbcffa function;
+    class metricas_src_main_cpp_src_metrics_native_lib_fadd7d4a function;
+    class cpp_include_metrics_9051c6c3 function;
+    class metricas_src_main_cpp_include_metrics_af1a9d98 function;
+    class metricas_src_main_cpp_include_algorithm_d489f250 function;
+    class metricas_src_main_cpp_src_algorithm_optimizer_5f59b6da function;
+    class cpp_src_metrics_optimizer_d305c404 function;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>cpp/include/metrics.h</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>string</code></td>
+  <td>cpp/include/metrics.h node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>MetricResult</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>MetricResult node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>value</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>value node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>string</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>cpp/include/metrics.h</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><code>algorithm.h</code><br><small style="color:var(--muted)">cpp/include/algorithm.h</small><br><code>main/cpp/include/metrics.h</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small><br><code>native-lib.cpp</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td>string node in project.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>label</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>label node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>timestamp</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>timestamp node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>main/cpp/include/metrics.h</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>string</code></td>
+  <td>No direct outbound edge</td>
+  <td>main/cpp/include/metrics.h node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>MetricResult</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>MetricResult node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>value</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>value node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>string</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>string node in project.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>label</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>label node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>timestamp</code><br><small style="color:var(--muted)">cpp/include/metrics.h</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>timestamp node in cpp/include/metrics.h.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>native-lib.cpp</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>algorithm.h</code><br><small style="color:var(--muted)">cpp/include/algorithm.h</small><br><code>string</code></td>
+  <td><code>vector</code></td>
+  <td>native-lib.cpp node in src/metrics/native-lib.cpp.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>calculateMetrics()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>calculateMean()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small><br><code>calculateStandardDeviation()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td>calculateMetrics() node in src/metrics/native-lib.cpp.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>vector</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>native-lib.cpp</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td>No direct outbound edge</td>
+  <td>vector node in project.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>MetricResult</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>MetricResult node in project.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>calculateMean()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>calculateMetrics()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td><code>calculateStandardDeviation()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td>calculateMean() node in src/metrics/native-lib.cpp.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>calculateStandardDeviation()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>calculateMean()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small><br><code>calculateMetrics()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>calculateMedian()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>calculateMedian() node in src/metrics/native-lib.cpp.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>calculatePercentile()</code><br><small style="color:var(--muted)">src/metrics/native-lib.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>calculatePercentile() node in src/metrics/native-lib.cpp.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>cpp/src/algorithm/stats.cpp</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>algorithm.h</code><br><small style="color:var(--muted)">cpp/include/algorithm.h</small></td>
+  <td>cpp/src/algorithm/stats.cpp node in src/algorithm/stats.cpp.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>calculateMean()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>calculateMetrics()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small><br><code>calculateStandardDeviation()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td>calculateMean() node in src/algorithm/stats.cpp.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>vector</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>vector node in project.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>calculateStandardDeviation()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>calculateMean()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>calculateMedian()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>calculateMedian() node in src/algorithm/stats.cpp.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>calculateMetrics()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>calculateMean()</code><br><small style="color:var(--muted)">src/algorithm/stats.cpp</small></td>
+  <td>No direct outbound edge</td>
+  <td>calculateMetrics() node in src/algorithm/stats.cpp.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>MetricResult</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>MetricResult node in project.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>metrics/optimizer.cpp</code><br><small style="color:var(--muted)">src/metrics/optimizer.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>algorithm.h</code><br><small style="color:var(--muted)">cpp/include/algorithm.h</small><br><code>vector</code></td>
+  <td>metrics/optimizer.cpp node in src/metrics/optimizer.cpp.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>gradientDescent()</code><br><small style="color:var(--muted)">src/metrics/optimizer.cpp</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>gradientDescent() node in src/metrics/optimizer.cpp.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>vector</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>metrics/optimizer.cpp</code><br><small style="color:var(--muted)">src/metrics/optimizer.cpp</small></td>
+  <td>No direct outbound edge</td>
+  <td>vector node in project.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>src/metrics/native-lib.cpp</code></td><td>6 nodes</td></tr>
+<tr><td><code>cpp/include/metrics.h</code></td><td>5 nodes</td></tr>
+<tr><td><code>src/algorithm/stats.cpp</code></td><td>5 nodes</td></tr>
+<tr><td><code>cpp/include/metrics.h</code></td><td>5 nodes</td></tr>
+<tr><td><code>src/algorithm/stats.cpp</code></td><td>4 nodes</td></tr>
+<tr><td><code>src/metrics/optimizer.cpp</code></td><td>2 nodes</td></tr>
+<tr><td><code>src/algorithm/optimizer.cpp</code></td><td>2 nodes</td></tr>
+<tr><td><code>cpp/include/algorithm.h</code></td><td>1 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: references x18, contains x16, imports x12, defines x6. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 5. REGLAS.md — AppBase ====== -->
+<h2 id="reglas-md-appbase">5. REGLAS.md — AppBase</h2>
+<p>REGLAS.md — AppBase groups implementation around reglasmd, regla, reglas, appbase, mostly in REGLAS.md. This section covers 14 nodes and 13 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: REGLAS.md — AppBase (14 nodes, 13 edges)
+    reglas_reglas_md_appbase_0326c581("REGLAS.md — AppBase<br/><small>REGLAS.md</small>")
+    reglas_864936e4("REGLAS.md")
+    reglas_regla_10_c_nativo_solo_en_metricas_10dc1d43("Regla 10 — C++ Nativo Solo en metricas<br/><small>REGLAS.md</small>")
+    reglas_regla_11_ios_80f382fc("Regla 11 — iOS<br/><small>REGLAS.md</small>")
+    reglas_regla_12_proguard_r8_01c7e55c("Regla 12 — ProGuard/R8<br/><small>REGLAS.md</small>")
+    reglas_regla_15_archivos_de_recursos_por_m_dulo_8287cb8f("Regla 15 — Archivos de Recursos por Módulo<br/><small>REGLAS.md</small>")
+    reglas_regla_9_build_variants_00324980("Regla 9 — Build Variants<br/><small>REGLAS.md</small>")
+    reglas_documentaci_n_de_normas_arquitect_nicas_e005fa34("Documentación de Normas Arquitectónicas<br/><small>REGLAS.md</small>")
+    reglas_regla_14_navegaci_n_403f5e8d("Regla 14 — Navegación<br/><small>REGLAS.md</small>")
+    reglas_reglas_321_75946c27("Reglas<br/><small>REGLAS.md</small>")
+    reglas_reglas_333_867d4eb9("Reglas<br/><small>REGLAS.md</small>")
+    reglas_reglas_346_dc715819("Reglas<br/><small>REGLAS.md</small>")
+    reglas_reglas_358_930b9da8("Reglas<br/><small>REGLAS.md</small>")
+    reglas_reglas_392_cfc9341c("Reglas<br/><small>REGLAS.md</small>")
+    reglas_864936e4 -->|contains| reglas_reglas_md_appbase_0326c581
+    reglas_reglas_md_appbase_0326c581 -->|contains| reglas_documentaci_n_de_normas_arquitect_nicas_e005fa34
+    reglas_reglas_md_appbase_0326c581 -->|contains| reglas_regla_10_c_nativo_solo_en_metricas_10dc1d43
+    reglas_reglas_md_appbase_0326c581 -->|contains| reglas_regla_11_ios_80f382fc
+    reglas_reglas_md_appbase_0326c581 -->|contains| reglas_regla_12_proguard_r8_01c7e55c
+    reglas_reglas_md_appbase_0326c581 -->|contains| reglas_regla_14_navegaci_n_403f5e8d
+    reglas_reglas_md_appbase_0326c581 -->|contains| reglas_regla_15_archivos_de_recursos_por_m_dulo_8287cb8f
+    reglas_reglas_md_appbase_0326c581 -->|contains| reglas_regla_9_build_variants_00324980
+    reglas_regla_9_build_variants_00324980 -->|contains| reglas_reglas_321_75946c27
+    reglas_regla_10_c_nativo_solo_en_metricas_10dc1d43 -->|contains| reglas_reglas_333_867d4eb9
+    reglas_regla_11_ios_80f382fc -->|contains| reglas_reglas_346_dc715819
+    reglas_regla_12_proguard_r8_01c7e55c -->|contains| reglas_reglas_358_930b9da8
+    reglas_regla_15_archivos_de_recursos_por_m_dulo_8287cb8f -->|contains| reglas_reglas_392_cfc9341c
+    class reglas_reglas_md_appbase_0326c581 concept;
+    class reglas_864936e4 concept;
+    class reglas_regla_10_c_nativo_solo_en_metricas_10dc1d43 concept;
+    class reglas_regla_11_ios_80f382fc concept;
+    class reglas_regla_12_proguard_r8_01c7e55c concept;
+    class reglas_regla_15_archivos_de_recursos_por_m_dulo_8287cb8f concept;
+    class reglas_regla_9_build_variants_00324980 concept;
+    class reglas_documentaci_n_de_normas_arquitect_nicas_e005fa34 concept;
+    class reglas_regla_14_navegaci_n_403f5e8d concept;
+    class reglas_reglas_321_75946c27 concept;
+    class reglas_reglas_333_867d4eb9 concept;
+    class reglas_reglas_346_dc715819 concept;
+    class reglas_reglas_358_930b9da8 concept;
+    class reglas_reglas_392_cfc9341c concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>REGLAS.md</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing REGLAS.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>REGLAS.md — AppBase</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing REGLAS.md — AppBase.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Documentación de Normas Arquitectónicas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Documentación de Normas Arquitectónicas.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Regla 9 — Build Variants</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 9 — Build Variants.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Regla 10 — C++ Nativo Solo en `metricas`</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 10 — C++ Nativo Solo en `metricas`.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>Regla 11 — iOS</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 11 — iOS.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>Regla 12 — ProGuard/R8</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 12 — ProGuard/R8.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>Regla 14 — Navegación</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 14 — Navegación.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>Regla 15 — Archivos de Recursos por Módulo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 15 — Archivos de Recursos por Módulo.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>14 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x13. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 6. CloudConnectionState ====== -->
+<h2 id="cloudconnectionstate">6. CloudConnectionState</h2>
+<p>CloudConnectionState groups implementation around sharedmoduleswift, ios, motoapp, shared, mostly in MotoApp/Shared/SharedModule.swift. This section covers 12 nodes and 14 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: CloudConnectionState (12 nodes, 14 edges)
+    subgraph cloudconnectionstate_MotoApp_Shared_SharedModule_6f93d24f["MotoApp/Shared/SharedModule.swift"]
+        ios_motoapp_shared_sharedmodule_2cee22ed("SharedModule.swift")
+        foundation_ec9624c8("Foundation<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+        ios_motoapp_shared_sharedmodule_cloudconnections_9a261307("CloudConnectionState<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+        ios_motoapp_shared_sharedmodule_motosharedstate_db105427("MotoSharedState<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+        ios_motoapp_shared_sharedmodule_userprofile_443b7956("UserProfile<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+        ios_motoapp_shared_sharedmodule_cloudconnections_3e45feed("connected<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+        ios_motoapp_shared_sharedmodule_cloudconnections_2f0dd6a9("connecting<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+        ios_motoapp_shared_sharedmodule_cloudconnections_6ae0a368("disconnected<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+        ios_motoapp_shared_sharedmodule_cloudconnections_ee88f95c("error<br/><small>MotoApp/Shared/SharedModule.swift</small>")
+    end
+    subgraph cloudconnectionstate_External_generated_f2840410["External / generated"]
+        bool_5039d155("Bool")
+        ios_motoapp_shared_sharedmodule_swift_string_58a465fe("String")
+        url_81736358("URL")
+    end
+    ios_motoapp_shared_sharedmodule_2cee22ed -->|imports| foundation_ec9624c8
+    class ios_motoapp_shared_sharedmodule_2cee22ed klass;
+    class foundation_ec9624c8 module;
+    class ios_motoapp_shared_sharedmodule_cloudconnections_9a261307 klass;
+    class ios_motoapp_shared_sharedmodule_motosharedstate_db105427 klass;
+    class ios_motoapp_shared_sharedmodule_userprofile_443b7956 klass;
+    class ios_motoapp_shared_sharedmodule_cloudconnections_3e45feed function;
+    class ios_motoapp_shared_sharedmodule_cloudconnections_2f0dd6a9 function;
+    class ios_motoapp_shared_sharedmodule_cloudconnections_6ae0a368 function;
+    class ios_motoapp_shared_sharedmodule_cloudconnections_ee88f95c function;
+    class bool_5039d155 klass;
+    class ios_motoapp_shared_sharedmodule_swift_string_58a465fe klass;
+    class url_81736358 klass;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>SharedModule.swift</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>Foundation</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td>SharedModule.swift node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Foundation</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td><code>SharedModule.swift</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td>No direct outbound edge</td>
+  <td>Foundation node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>MotoSharedState</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>MotoSharedState node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Bool</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Bool node in project.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>CloudConnectionState</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>CloudConnectionState node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>disconnected</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>disconnected node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>connecting</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>connecting node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>connected</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>connected node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>error</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>error node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>String</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>String node in project.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>UserProfile</code><br><small style="color:var(--muted)">MotoApp/Shared/SharedModule.swift</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>UserProfile node in MotoApp/Shared/SharedModule.swift.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>URL</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>URL node in project.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>MotoApp/Shared/SharedModule.swift</code></td><td>9 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: references x6, case of x4, contains x3, imports x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 7. Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos ====== -->
+<h2 id="regla-4-m-dulo-basededatos-como-gestor-central-d">7. Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos</h2>
+<p>Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos groups implementation around reglasmd, módulo, regla, basededatos, mostly in REGLAS.md. This section covers 8 nodes and 7 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos (8 nodes, 7 edges)
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c("Regla 4 — Módulo Basededatos como Gesto...<br/><small>REGLAS.md</small>")
+    reglas_convenci_n_de_nombres_91bcceea("Convención de Nombres<br/><small>REGLAS.md</small>")
+    reglas_crear_un_nuevo_archivo_basededatos_2b70f506("Crear un Nuevo Archivo Basededatos<br/><small>REGLAS.md</small>")
+    reglas_descripci_n_133_1a796d60("Descripción<br/><small>REGLAS.md</small>")
+    reglas_ejemplo_de_archivo_by_m_dulo_fef2ab79("Ejemplo de Archivo by Módulo<br/><small>REGLAS.md</small>")
+    reglas_estructura_de_paquetes_por_m_dulo_057c274f("Estructura de Paquetes por Módulo<br/><small>REGLAS.md</small>")
+    reglas_regla_adicional_colecciones_por_m_dulo_e7e9aa18("Regla Adicional — Colecciones por Módulo<br/><small>REGLAS.md</small>")
+    reglas_reglas_espec_ficas_170_b7863f48("Reglas Específicas<br/><small>REGLAS.md</small>")
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c -->|contains| reglas_convenci_n_de_nombres_91bcceea
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c -->|contains| reglas_crear_un_nuevo_archivo_basededatos_2b70f506
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c -->|contains| reglas_descripci_n_133_1a796d60
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c -->|contains| reglas_ejemplo_de_archivo_by_m_dulo_fef2ab79
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c -->|contains| reglas_estructura_de_paquetes_por_m_dulo_057c274f
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c -->|contains| reglas_regla_adicional_colecciones_por_m_dulo_e7e9aa18
+    reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c -->|contains| reglas_reglas_espec_ficas_170_b7863f48
+    class reglas_regla_4_m_dulo_basededatos_como_gestor_ce_906e9c7c concept;
+    class reglas_convenci_n_de_nombres_91bcceea concept;
+    class reglas_crear_un_nuevo_archivo_basededatos_2b70f506 concept;
+    class reglas_descripci_n_133_1a796d60 concept;
+    class reglas_ejemplo_de_archivo_by_m_dulo_fef2ab79 concept;
+    class reglas_estructura_de_paquetes_por_m_dulo_057c274f concept;
+    class reglas_regla_adicional_colecciones_por_m_dulo_e7e9aa18 concept;
+    class reglas_reglas_espec_ficas_170_b7863f48 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 4 — Módulo Basededatos como Gestor Central de Base de Datos.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Descripción</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Descripción.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Estructura de Paquetes por Módulo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Estructura de Paquetes por Módulo.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Convención de Nombres</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Convención de Nombres.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Reglas Específicas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas Específicas.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Ejemplo de Archivo by Módulo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ejemplo de Archivo by Módulo.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>Crear un Nuevo Archivo Basededatos</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Crear un Nuevo Archivo Basededatos.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>Regla Adicional — Colecciones por Módulo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla Adicional — Colecciones por Módulo.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>8 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x7. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 8. Regla 2 — Módulo Tema como Única Fuente de Estilos ====== -->
+<h2 id="regla-2-m-dulo-tema-como-nica-fuente-de-estilos">8. Regla 2 — Módulo Tema como Única Fuente de Estilos</h2>
+<p>Regla 2 — Módulo Tema como Única Fuente de Estilos groups implementation around reglasmd, módulo, tema, regla, mostly in REGLAS.md. This section covers 5 nodes and 4 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 2 — Módulo Tema como Única Fuente de Estilos (5 nodes, 4 edges)
+    reglas_regla_2_m_dulo_tema_como_nica_fuente_de_e_f6f597be("Regla 2 — Módulo Tema como Única Fuente...<br/><small>REGLAS.md</small>")
+    reglas_cada_m_dulo_responsable_de_tema_3b6461f9("Cada Módulo Responsable de Tema<br/><small>REGLAS.md</small>")
+    reglas_descripci_n_51_5624f2e5("Descripción<br/><small>REGLAS.md</small>")
+    reglas_ejemplo_de_uso_correcto_54974e9e("Ejemplo de Uso Correcto<br/><small>REGLAS.md</small>")
+    reglas_reglas_espec_ficas_202c25e9("Reglas Específicas<br/><small>REGLAS.md</small>")
+    reglas_regla_2_m_dulo_tema_como_nica_fuente_de_e_f6f597be -->|contains| reglas_cada_m_dulo_responsable_de_tema_3b6461f9
+    reglas_regla_2_m_dulo_tema_como_nica_fuente_de_e_f6f597be -->|contains| reglas_descripci_n_51_5624f2e5
+    reglas_regla_2_m_dulo_tema_como_nica_fuente_de_e_f6f597be -->|contains| reglas_ejemplo_de_uso_correcto_54974e9e
+    reglas_regla_2_m_dulo_tema_como_nica_fuente_de_e_f6f597be -->|contains| reglas_reglas_espec_ficas_202c25e9
+    class reglas_regla_2_m_dulo_tema_como_nica_fuente_de_e_f6f597be concept;
+    class reglas_cada_m_dulo_responsable_de_tema_3b6461f9 concept;
+    class reglas_descripci_n_51_5624f2e5 concept;
+    class reglas_ejemplo_de_uso_correcto_54974e9e concept;
+    class reglas_reglas_espec_ficas_202c25e9 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 2 — Módulo Tema como Única Fuente de Estilos</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 2 — Módulo Tema como Única Fuente de Estilos.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Descripción</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Descripción.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Reglas Específicas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas Específicas.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Ejemplo de Uso Correcto</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ejemplo de Uso Correcto.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Cada Módulo Responsable de Tema</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Cada Módulo Responsable de Tema.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>5 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 9. Regla 1 — Independencia de Módulos ====== -->
+<h2 id="regla-1-independencia-de-m-dulos">9. Regla 1 — Independencia de Módulos</h2>
+<p>Regla 1 — Independencia de Módulos groups implementation around reglasmd, módulos, regla, independencia, mostly in REGLAS.md. This section covers 5 nodes and 4 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 1 — Independencia de Módulos (5 nodes, 4 edges)
+    reglas_regla_1_independencia_de_m_dulos_c73ef5f3("Regla 1 — Independencia de Módulos<br/><small>REGLAS.md</small>")
+    reglas_descripci_n_8897f0ed("Descripción<br/><small>REGLAS.md</small>")
+    reglas_ejemplo_64378792("Ejemplo<br/><small>REGLAS.md</small>")
+    reglas_excepci_n_b494d85a("Excepción<br/><small>REGLAS.md</small>")
+    reglas_m_dulos_compartidos_permitidos_b36bbdba("Módulos Compartidos Permitidos<br/><small>REGLAS.md</small>")
+    reglas_regla_1_independencia_de_m_dulos_c73ef5f3 -->|contains| reglas_descripci_n_8897f0ed
+    reglas_regla_1_independencia_de_m_dulos_c73ef5f3 -->|contains| reglas_ejemplo_64378792
+    reglas_regla_1_independencia_de_m_dulos_c73ef5f3 -->|contains| reglas_excepci_n_b494d85a
+    reglas_regla_1_independencia_de_m_dulos_c73ef5f3 -->|contains| reglas_m_dulos_compartidos_permitidos_b36bbdba
+    class reglas_regla_1_independencia_de_m_dulos_c73ef5f3 concept;
+    class reglas_descripci_n_8897f0ed concept;
+    class reglas_ejemplo_64378792 concept;
+    class reglas_excepci_n_b494d85a concept;
+    class reglas_m_dulos_compartidos_permitidos_b36bbdba concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 1 — Independencia de Módulos</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 1 — Independencia de Módulos.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Descripción</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Descripción.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Ejemplo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ejemplo.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Excepción</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Excepción.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Módulos Compartidos Permitidos</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Módulos Compartidos Permitidos.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>5 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 10. Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones ====== -->
+<h2 id="regla-3-versi-ncatalog-libs-versions-toml-como-n">10. Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones</h2>
+<p>Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones groups implementation around reglasmd, regla, versióncatalog, libsversionstoml, mostly in REGLAS.md. This section covers 5 nodes and 4 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones (5 nodes, 4 edges)
+    reglas_regla_3_versi_ncatalog_libs_versions_toml_9d380b85("Regla 3 — VersiónCatalog (libs.versions...<br/><small>REGLAS.md</small>")
+    reglas_descripci_n_95_d8e67f80("Descripción<br/><small>REGLAS.md</small>")
+    reglas_ejemplo_117_b3d1dc84("Ejemplo<br/><small>REGLAS.md</small>")
+    reglas_estructura_del_cat_logo_acb1bdf0("Estructura del Catálogo<br/><small>REGLAS.md</small>")
+    reglas_reglas_espec_ficas_98_898efa55("Reglas Específicas<br/><small>REGLAS.md</small>")
+    reglas_regla_3_versi_ncatalog_libs_versions_toml_9d380b85 -->|contains| reglas_descripci_n_95_d8e67f80
+    reglas_regla_3_versi_ncatalog_libs_versions_toml_9d380b85 -->|contains| reglas_ejemplo_117_b3d1dc84
+    reglas_regla_3_versi_ncatalog_libs_versions_toml_9d380b85 -->|contains| reglas_estructura_del_cat_logo_acb1bdf0
+    reglas_regla_3_versi_ncatalog_libs_versions_toml_9d380b85 -->|contains| reglas_reglas_espec_ficas_98_898efa55
+    class reglas_regla_3_versi_ncatalog_libs_versions_toml_9d380b85 concept;
+    class reglas_descripci_n_95_d8e67f80 concept;
+    class reglas_ejemplo_117_b3d1dc84 concept;
+    class reglas_estructura_del_cat_logo_acb1bdf0 concept;
+    class reglas_reglas_espec_ficas_98_898efa55 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 3 — VersiónCatalog (libs.versions.toml) como Única Fuente de Versiones.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Descripción</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Descripción.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Reglas Específicas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas Específicas.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Estructura del Catálogo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Estructura del Catálogo.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Ejemplo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ejemplo.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>5 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 11. Regla 5 — Nomenclatura de Archivos por Módulo ====== -->
+<h2 id="regla-5-nomenclatura-de-archivos-por-m-dulo">11. Regla 5 — Nomenclatura de Archivos por Módulo</h2>
+<p>Regla 5 — Nomenclatura de Archivos por Módulo groups implementation around módulo, reglasmd, por, ejemplo, mostly in REGLAS.md. This section covers 4 nodes and 3 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 5 — Nomenclatura de Archivos por Módulo (4 nodes, 3 edges)
+    reglas_regla_5_nomenclatura_de_archivos_por_m_du_96d444c7("Regla 5 — Nomenclatura de Archivos por...<br/><small>REGLAS.md</small>")
+    reglas_ejemplo_m_dulo_dashboard_de893f0d("Ejemplo: módulo dashboard<br/><small>REGLAS.md</small>")
+    reglas_ejemplo_m_dulo_inicio_cb89ec7f("Ejemplo: módulo inicio<br/><small>REGLAS.md</small>")
+    reglas_estructura_de_carpetas_por_m_dulo_8224096f("Estructura de Carpetas por Módulo<br/><small>REGLAS.md</small>")
+    reglas_regla_5_nomenclatura_de_archivos_por_m_du_96d444c7 -->|contains| reglas_ejemplo_m_dulo_dashboard_de893f0d
+    reglas_regla_5_nomenclatura_de_archivos_por_m_du_96d444c7 -->|contains| reglas_ejemplo_m_dulo_inicio_cb89ec7f
+    reglas_regla_5_nomenclatura_de_archivos_por_m_du_96d444c7 -->|contains| reglas_estructura_de_carpetas_por_m_dulo_8224096f
+    class reglas_regla_5_nomenclatura_de_archivos_por_m_du_96d444c7 concept;
+    class reglas_ejemplo_m_dulo_dashboard_de893f0d concept;
+    class reglas_ejemplo_m_dulo_inicio_cb89ec7f concept;
+    class reglas_estructura_de_carpetas_por_m_dulo_8224096f concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 5 — Nomenclatura de Archivos por Módulo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 5 — Nomenclatura de Archivos por Módulo.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Estructura de Carpetas por Módulo</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Estructura de Carpetas por Módulo.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Ejemplo: módulo `inicio`</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ejemplo: módulo `inicio`.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Ejemplo: módulo `dashboard`</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ejemplo: módulo `dashboard`.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>4 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 12. Regla 6 — Gestión de Permisos y Manifests ====== -->
+<h2 id="regla-6-gesti-n-de-permisos-y-manifests">12. Regla 6 — Gestión de Permisos y Manifests</h2>
+<p>Regla 6 — Gestión de Permisos y Manifests groups implementation around reglasmd, regla, gestión, permisos, mostly in REGLAS.md. This section covers 3 nodes and 2 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 6 — Gestión de Permisos y Manifests (3 nodes, 2 edges)
+    reglas_regla_6_gesti_n_de_permisos_y_manifests_dc0aad29("Regla 6 — Gestión de Permisos y Manifests<br/><small>REGLAS.md</small>")
+    reglas_descripci_n_277_68788a85("Descripción<br/><small>REGLAS.md</small>")
+    reglas_reglas_1ae6c819("Reglas<br/><small>REGLAS.md</small>")
+    reglas_regla_6_gesti_n_de_permisos_y_manifests_dc0aad29 -->|contains| reglas_descripci_n_277_68788a85
+    reglas_regla_6_gesti_n_de_permisos_y_manifests_dc0aad29 -->|contains| reglas_reglas_1ae6c819
+    class reglas_regla_6_gesti_n_de_permisos_y_manifests_dc0aad29 concept;
+    class reglas_descripci_n_277_68788a85 concept;
+    class reglas_reglas_1ae6c819 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 6 — Gestión de Permisos y Manifests</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 6 — Gestión de Permisos y Manifests.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Descripción</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Descripción.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>3 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 13. Regla 8 — DI con Hilt y Koin ====== -->
+<h2 id="regla-8-di-con-hilt-y-koin">13. Regla 8 — DI con Hilt y Koin</h2>
+<p>Regla 8 — DI con Hilt y Koin groups implementation around reglasmd, regla, con, hilt, mostly in REGLAS.md. This section covers 3 nodes and 2 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 8 — DI con Hilt y Koin (3 nodes, 2 edges)
+    reglas_regla_8_di_con_hilt_y_koin_4e0671e0("Regla 8 — DI con Hilt y Koin<br/><small>REGLAS.md</small>")
+    reglas_descripci_n_304_5fc58476("Descripción<br/><small>REGLAS.md</small>")
+    reglas_reglas_309_3ed72a3c("Reglas<br/><small>REGLAS.md</small>")
+    reglas_regla_8_di_con_hilt_y_koin_4e0671e0 -->|contains| reglas_descripci_n_304_5fc58476
+    reglas_regla_8_di_con_hilt_y_koin_4e0671e0 -->|contains| reglas_reglas_309_3ed72a3c
+    class reglas_regla_8_di_con_hilt_y_koin_4e0671e0 concept;
+    class reglas_descripci_n_304_5fc58476 concept;
+    class reglas_reglas_309_3ed72a3c concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 8 — DI con Hilt y Koin</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 8 — DI con Hilt y Koin.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Descripción</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Descripción.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>3 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 14. Regla 13 — No Archivos Basura ====== -->
+<h2 id="regla-13-no-archivos-basura">14. Regla 13 — No Archivos Basura</h2>
+<p>Regla 13 — No Archivos Basura groups implementation around reglasmd, regla, archivos, basura, mostly in REGLAS.md. This section covers 2 nodes and 1 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 13 — No Archivos Basura (2 nodes, 1 edges)
+    reglas_regla_13_no_archivos_basura_35b992bf("Regla 13 — No Archivos Basura<br/><small>REGLAS.md</small>")
+    reglas_reglas_370_74be9f7a("Reglas<br/><small>REGLAS.md</small>")
+    reglas_regla_13_no_archivos_basura_35b992bf -->|contains| reglas_reglas_370_74be9f7a
+    class reglas_regla_13_no_archivos_basura_35b992bf concept;
+    class reglas_reglas_370_74be9f7a concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 13 — No Archivos Basura</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 13 — No Archivos Basura.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>2 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 15. Regla 7 — Registro de Módulos ====== -->
+<h2 id="regla-7-registro-de-m-dulos">15. Regla 7 — Registro de Módulos</h2>
+<p>Regla 7 — Registro de Módulos groups implementation around reglasmd, regla, registro, módulos, mostly in REGLAS.md. This section covers 2 nodes and 1 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Regla 7 — Registro de Módulos (2 nodes, 1 edges)
+    reglas_regla_7_registro_de_m_dulos_6a372b9b("Regla 7 — Registro de Módulos<br/><small>REGLAS.md</small>")
+    reglas_reglas_292_4613f2c5("Reglas<br/><small>REGLAS.md</small>")
+    reglas_regla_7_registro_de_m_dulos_6a372b9b -->|contains| reglas_reglas_292_4613f2c5
+    class reglas_regla_7_registro_de_m_dulos_6a372b9b concept;
+    class reglas_reglas_292_4613f2c5 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Regla 7 — Registro de Módulos</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Regla 7 — Registro de Módulos.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Reglas</code><br><small style="color:var(--muted)">REGLAS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Reglas.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>REGLAS.md</code></td><td>2 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 16. Other ====== -->
+<h2 id="other">16. Other</h2>
+<p>Other groups implementation around featuresswift, settingsgradlekts, colorskt, tema, mostly in MotoApp/Features/Features.swift, settings.gradle.kts, project/tema/Colors.kt. This section covers 3 nodes and 0 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Other (3 nodes, 0 edges)
+    ios_motoapp_features_features_bcdac0bf("Features.swift")
+    tema_src_main_java_com_moto_project_tema_colors_2a2212c8("Colors.kt")
+    settings_gradle_6d67144b("settings.gradle.kts")
+    class ios_motoapp_features_features_bcdac0bf klass;
+    class tema_src_main_java_com_moto_project_tema_colors_2a2212c8 klass;
+    class settings_gradle_6d67144b function;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>Features.swift</code><br><small style="color:var(--muted)">MotoApp/Features/Features.swift</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Features.swift node in MotoApp/Features/Features.swift.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>settings.gradle.kts</code><br><small style="color:var(--muted)">settings.gradle.kts</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>settings.gradle.kts node in settings.gradle.kts.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Colors.kt</code><br><small style="color:var(--muted)">project/tema/Colors.kt</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Colors.kt node in project/tema/Colors.kt.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>MotoApp/Features/Features.swift</code></td><td>1 nodes</td></tr>
+<tr><td><code>settings.gradle.kts</code></td><td>1 nodes</td></tr>
+<tr><td><code>project/tema/Colors.kt</code></td><td>1 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: No high-confidence call edges detected. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<h2 id="stats">Project Statistics</h2>
+
+<div class="grid">
+  <div class="card">
+    <h4>Graph</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>Nodes</td><td>427</td></tr>
+      <tr><td>Edges</td><td>464</td></tr>
+      <tr><td>Hyperedges</td><td>0</td></tr>
+      <tr><td>Communities</td><td>66</td></tr>
+      <tr><td>Documented Sections</td><td>15</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Edge Confidence</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>EXTRACTED</td><td>462</td></tr>
+      <tr><td>INFERRED</td><td>2</td></tr>
+      <tr><td>AMBIGUOUS</td><td>0</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
+  <p>AppBase — Architecture Documentation</p>
+  <p>Generated: 2026-09-12 14:39 UTC · graphify callflow-html</p>
+</div>
+
+</div><!-- .container -->
+
+<script>
+(function () {
+  const mermaidConfig = {
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+    flowchart: { htmlLabels: true, useMaxWidth: true },
+    themeVariables: {
+      primaryColor: '#1e293b',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#38bdf8',
+      secondaryColor: '#0f172a',
+      tertiaryColor: '#334155',
+      lineColor: '#64748b',
+      textColor: '#e2e8f0',
+    }
+  };
+
+  mermaid.initialize(mermaidConfig);
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function enhanceMermaidDiagrams() {
+    document.querySelectorAll('.mermaid').forEach((container) => {
+      if (container.dataset.zoomReady === 'true') return;
+      const svg = container.querySelector('svg');
+      if (!svg) return;
+
+      container.dataset.zoomReady = 'true';
+      container.classList.add('is-enhanced');
+
+      const viewport = document.createElement('div');
+      viewport.className = 'mermaid-viewport';
+      svg.parentNode.insertBefore(viewport, svg);
+      viewport.appendChild(svg);
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'mermaid-toolbar';
+      toolbar.innerHTML = [
+        '<button type="button" data-action="zoom-out" title="Zoom out">-</button>',
+        '<span class="zoom-level" data-role="level">100%</span>',
+        '<button type="button" data-action="zoom-in" title="Zoom in">+</button>',
+        '<button type="button" data-action="fit" title="Fit width">Fit</button>',
+        '<button type="button" data-action="reset" title="Reset view">Reset</button>'
+      ].join('');
+      container.insertBefore(toolbar, viewport);
+
+      const state = { scale: 1, x: 0, y: 0, dragging: false, startX: 0, startY: 0, originX: 0, originY: 0 };
+      const level = toolbar.querySelector('[data-role="level"]');
+
+      function applyTransform() {
+        svg.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
+        level.textContent = `${Math.round(state.scale * 100)}%`;
+      }
+
+      function zoomBy(delta) {
+        state.scale = clamp(state.scale + delta, 0.25, 3);
+        applyTransform();
+      }
+
+      function reset() {
+        state.scale = 1;
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      function fitWidth() {
+        const rawWidth = svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width
+          ? svg.viewBox.baseVal.width
+          : svg.getBoundingClientRect().width / state.scale;
+        if (!rawWidth) {
+          reset();
+          return;
+        }
+        state.scale = clamp((viewport.clientWidth - 48) / rawWidth, 0.25, 1.4);
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      toolbar.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+        const action = button.dataset.action;
+        if (action === 'zoom-in') zoomBy(0.15);
+        if (action === 'zoom-out') zoomBy(-0.15);
+        if (action === 'fit') fitWidth();
+        if (action === 'reset') reset();
+      });
+
+      viewport.addEventListener('wheel', (event) => {
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        zoomBy(event.deltaY < 0 ? 0.1 : -0.1);
+      }, { passive: false });
+
+      viewport.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        state.dragging = true;
+        state.startX = event.clientX;
+        state.startY = event.clientY;
+        state.originX = state.x;
+        state.originY = state.y;
+        viewport.classList.add('is-dragging');
+        viewport.setPointerCapture(event.pointerId);
+      });
+
+      viewport.addEventListener('pointermove', (event) => {
+        if (!state.dragging) return;
+        state.x = state.originX + event.clientX - state.startX;
+        state.y = state.originY + event.clientY - state.startY;
+        applyTransform();
+      });
+
+      function endDrag(event) {
+        if (!state.dragging) return;
+        state.dragging = false;
+        viewport.classList.remove('is-dragging');
+        if (viewport.hasPointerCapture(event.pointerId)) {
+          viewport.releasePointerCapture(event.pointerId);
+        }
+      }
+
+      viewport.addEventListener('pointerup', endDrag);
+      viewport.addEventListener('pointercancel', endDrag);
+      applyTransform();
+    });
+  }
+
+  function renderMermaid() {
+    const result = mermaid.run
+      ? mermaid.run({ querySelector: '.mermaid' })
+      : Promise.resolve();
+    Promise.resolve(result)
+      .then(enhanceMermaidDiagrams)
+      .catch((error) => {
+        console.error('Mermaid render failed:', error);
+        enhanceMermaidDiagrams();
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMermaid);
+  } else {
+    renderMermaid();
+  }
+})();
+</script>
+
+</body>
+</html>
